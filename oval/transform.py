@@ -3,8 +3,8 @@ import re
 
 # version of each of the OVAL items which should rev when they change
 transform_version = {
-    'Definition' : "1",
-    'Test'       : "1",
+    'Definition' : "2",
+    'Test'       : "2",
     'Object'     : "1",
     'State'      : "1"
 }
@@ -22,7 +22,7 @@ def criterias( nvras, product, rl_version ) :
 
         criterias.append( 
             {
-                'operator' : "OR",
+                'operator' : "AND",
                 'comment'  : "Rocky Linux must be installed",
                 'id'       : "",
                 'nested'   : True,
@@ -56,7 +56,8 @@ def criterias( nvras, product, rl_version ) :
             }
         )
 
-    # OR of the product installed (i.e. Rocky 8)
+    # Marks the end of a product's package alternatives. The XML serializer
+    # requires this platform test AND one of the preceding package pairs.
     criterias.append(
         {
             'operator' : "OR",
@@ -184,7 +185,7 @@ def generate_default( tests, objects, states, base_id, rl_version ) :
             'id'      : base_id + str(len( tests ) + 1).zfill( 3 ),
             'version' : transform_version[ 'Test' ],
             'comment' : "Rocky Linux must be installed",
-            'check'   : "none satisfy",
+            'check'   : "at least one",
             'oid'     : base_id + str(len( objects ) + 1).zfill( 3 ),
             'sids'    : [ base_id + str(len( states ) + 1).zfill( 3 ) ]
         } 

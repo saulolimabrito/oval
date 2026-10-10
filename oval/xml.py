@@ -186,6 +186,32 @@ def criteria( scope, contents, xml = '' ) :
     criterion and nested criteria
     """
 
+    # The transform supplies a base platform guard followed by package pairs
+    # for each product, terminated by that product's platform criterion.
+    # Platform checks are prerequisites, never alternatives to a package test.
+    if contents and contents[0][ 'nested' ] :
+        base = contents[0]
+        xml = xml + '  <criteria operator="AND">\n' + \
+              '    <criterion comment="' + base[ 'comment' ] + '"\n' + \
+              '      test_ref="' + scope + 'tst:' + base[ 'id' ] + '"/>\n' + \
+              '    <criteria operator="OR">\n'
+
+        packages = [ ]
+        for content in contents[1:] :
+            if content[ 'operator' ] == "OR" :
+                xml = xml + '      <criteria operator="AND">\n' + \
+                      '        <criterion comment="' + content[ 'comment' ] + '"\n' + \
+                      '          test_ref="' + scope + 'tst:' + content[ 'id' ] + '"/>\n' + \
+                      '        <criteria operator="OR">\n' + \
+                      criteria( scope, packages ) + \
+                      '        </criteria>\n' + \
+                      '      </criteria>\n'
+                packages = [ ]
+            else :
+                packages.append( content )
+
+        return xml + '    </criteria>\n' + '  </criteria>\n'
+
     for index, content in enumerate( contents ) :
 
         if content[ 'operator' ] != "" :
